@@ -20,7 +20,7 @@ pagination.pagerSize = 6
   
 [languages]
   [languages.en]
-    title = "Terminal"
+    title = "giacolees - Tech Blog"
     subtitle = "A simple, retro theme for Hugo"
     keywords = ""
     copyright = ""
