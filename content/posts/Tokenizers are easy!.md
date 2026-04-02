@@ -11,6 +11,7 @@ description = "From words to bytes: why tokenizers don't just split on spaces, h
 showFullContent = false
 readingTime = true
 hideComments = false
+repo = "https://github.com/giacolees/BPETokenizer"
 +++
 
 # Introduction
@@ -109,8 +110,11 @@ BPE starts with a vocabulary of individual bytes, then repeatedly finds the most
 <img src="/images/BPEVisualization.gif" alt="BPE overview" />
 <figcaption aria-hidden="true">BPE iteratively merges the most frequent adjacent token pair into a new token. At each step, all pair co-occurrence counts are shown on the left — the highlighted pair is selected — and the sequences on the right are updated to reflect the merge.</figcaption>
 </figure>
+
 Nowadays, code is more of a commodity than ever before, but I still feel that spending time on algorithms and implementation details makes sense.
-The devil is in the details, especially with AI-generated code, so I will provide in this section an  overview of hand-written BPE algorithms in an incremental fashion, from naive to most optimized.    
+The devil is in the details, especially with AI-generated code, so I will provide in this section an overview of hand-written BPE algorithms in an incremental fashion, from naive to most optimized.
+All implementations are also available at [giacolees/BPETokenizer](https://github.com/giacolees/BPETokenizer).
+
 ## Pre-Tokenization
 
 Pretokenization is a coarse-grained tokenization step that runs before training begins. Rather than operating directly on the raw byte stream of the corpus, we first split the text into surface words and count how often each unique word appears. 
