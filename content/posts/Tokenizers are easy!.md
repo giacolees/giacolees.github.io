@@ -1,15 +1,15 @@
 +++
-title = "Tokenizers are Easy!"
+title = "Tokenizers are easy!"
 date = "2026-03-19T22:58:56+01:00"
 #dateFormat = "2006-01-02" # This value can be configured for per-post date formatting
-author = ""
-authorTwitter = "" #do not include @
-cover = ""
-tags = ["", ""]
-keywords = ["", ""]
-description = ""
+author = "giacolees"
+authorTwitter = "TechLees_" #do not include @
+cover = "/images/cover_Tokenizer.png"
+tags = ["LLMs", "tokens", "heap", "algorihms"]
+keywords = []
+description = "From words to bytes: why tokenizers don't just split on spaces, how Byte-Pair Encoding builds a practical vocabulary, and a hands-on look at optimizing BPE from naïve O(V×M) to 85× faster with an inverted index and heap."
 showFullContent = false
-readingTime = false
+readingTime = true
 hideComments = false
 +++
 
