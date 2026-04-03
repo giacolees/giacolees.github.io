@@ -104,7 +104,7 @@ Now that we have the basics covered, we can look at how BPE builds on top of byt
 # Byte Pair Encoding
 
 The byte pair encoding algorithm isn't a novelty in computer science, it's been described by Philippe Gage in 1994 as a new algorithm for data compression.
-Then in 2016, [**Sennrich** et Al.](@sennrichNeuralMachineTranslation2016) proposed to introduce this tokenization into NLP, in order to address problems described above.
+Then in 2016, [Sennrich et Al.](https://arxiv.org/abs/1508.07909) proposed to introduce this tokenization into NLP, in order to address problems described above.
 BPE starts with a vocabulary of individual bytes, then repeatedly finds the most frequent adjacent pair of tokens across the corpus, merges them into a single new token, and adds that token to the vocabulary. This process continues until the vocabulary reaches the desired size.
 <figure>
 <img src="/images/BPEVisualization.gif" alt="BPE overview" />
@@ -144,7 +144,7 @@ A first naive idea is to scan the entire corpus, merge the most frequent adjacen
 A first optimization can be to maintain a running frequency table of all adjacent token pairs, pick the most frequent one, merge it into a single new token, and update the frequency table by scanning every word in the corpus and then repeating until the desired vocabulary size is reached.
 The algorithm is conceptually simple:
 
-1. Scan a flat dict mapping every adjacent token pair `(a, b)` to its aggregate frequency across all words and pick the maximum with.
+1. Scan `pair_counts`, a flat dict mapping every adjacent token pair `(a, b)` to its aggregate frequency across all words and pick the maximum with.
    This is `O(P)` where P is the number of distinct pairs.
 2. Assign the next available ID `i` and record `tokens[i] = tokens[a] + tokens[b]`.
 3. Iterate over all words in the corpus. For each word, do a linear scan of its current token sequence and replace every occurrence of `(a, b)` with `i`. While doing so, surgically update `pair_counts` in-place: the three affected pairs — `(prev, a)`, `(a, b)`, and `(b, next)` — are decremented, and their replacements `(prev, i)` and `(i, next)` are incremented. This avoids a full recount from scratch.
@@ -381,3 +381,8 @@ The interactive demo below runs the same BPE tokenizer implemented in this proje
 
 <script src="/js/bpe-tokenizer.js"></script>
 <script src="/js/tokenizer-demo.js"></script>
+
+# References 
+[Stanford CS336 Language Modeling from Scratch | Spring 2025 | Lecture 1: Overview and Tokenization](https://www.youtube.com/watch?v=SQ3fZ1sAqXI&list=PLoROMvodv4rOY23Y0BoGoBGgQ1zmU_MT_): The first lesson of Stanford 's course covers the fundamentals of modern language models.
+[Implementing A Byte Pair Encoding (BPE) Tokenizer From Scratch](https://sebastianraschka.com/blog/2025/bpe-from-scratch.html): To delve into Tokenizers from a linguistic perspective rather than a computational one.
+
