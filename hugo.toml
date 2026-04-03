@@ -37,3 +37,6 @@ pagination.pagerSize = 6
         identifier = "about"
         name = "About"
         url = "/about"
+
+[services.googleAnalytics]
+  ID = "G-L0XGQD9JPT"
