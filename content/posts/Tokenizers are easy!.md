@@ -385,4 +385,3 @@ The interactive demo below runs the same BPE tokenizer implemented in this proje
 # References 
 [Stanford CS336 Language Modeling from Scratch | Spring 2025 | Lecture 1: Overview and Tokenization](https://www.youtube.com/watch?v=SQ3fZ1sAqXI&list=PLoROMvodv4rOY23Y0BoGoBGgQ1zmU_MT_): The first lesson of Stanford 's course covers the fundamentals of modern language models.
 [Implementing A Byte Pair Encoding (BPE) Tokenizer From Scratch](https://sebastianraschka.com/blog/2025/bpe-from-scratch.html): To delve into Tokenizers from a linguistic perspective rather than a computational one.
-
