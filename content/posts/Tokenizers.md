@@ -14,6 +14,15 @@ hideComments = false
 repo = "https://github.com/giacolees/BPETokenizer"
 +++
 
+<div style="border-left:3px solid #c9a84c;background:#1a170f;padding:0.9rem 1.2rem;margin:1.5rem 0;border-radius:0 6px 6px 0">
+  <div style="color:#c9a84c;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.6rem">TL;DR</div>
+  <p style="color:#eee;margin:0;line-height:1.8">
+    Your LLM has never read a single word. It reads <strong>tokens</strong> — and the way text gets chopped up matters more than you'd think. Splitting on spaces explodes the vocabulary and chokes on anything outside English. The fix? <strong>Byte-Pair Encoding</strong>: start from raw bytes, greedily merge the most frequent pairs, repeat. Simple idea, nasty bottleneck — the naive version scans every word on every merge, costing O(V × M). An <strong>inverted index</strong> cuts that to only the words that matter (~17× faster). Pair it with a <strong>max-heap</strong> and the speedup compounds to <strong>85×</strong> at full vocabulary. All implementations are <a href="https://github.com/giacolees/BPETokenizer">open-source</a>.
+  </p>
+</div>
+
+---
+
 # Introduction
 
 If you're into Artificial Intelligence recently, you've surely heard that prior to adding positional embedding, computing attention, and so on, transformers convert words into embeddings. You've also likely heard that this is a simplification because, more precisely, sentences are first converted into **tokens**.
@@ -113,7 +122,6 @@ BPE starts with a vocabulary of individual bytes, then repeatedly finds the most
 
 Nowadays, code is more of a commodity than ever before, but I still feel that spending time on algorithms and implementation details makes sense.
 The devil is in the details, especially with AI-generated code, so I will provide in this section an overview of hand-written BPE algorithms in an incremental fashion, from naive to most optimized.
-All implementations are also available at [giacolees/BPETokenizer](https://github.com/giacolees/BPETokenizer).
 
 ## Pre-Tokenization
 
