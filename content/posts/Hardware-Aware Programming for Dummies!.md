@@ -13,9 +13,14 @@ readingTime = true
 hideComments = false
 +++
 
-
+<div style="border-left:3px solid #c9a84c;background:#1a170f;padding:0.9rem 1.2rem;margin:1.5rem 0;border-radius:0 6px 6px 0">
+  <div style="color:#c9a84c;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.6rem">TL;DR</div>
+  <p style="color:#eee;margin:0;line-height:1.8">Hardware-aware programming requires matching your computational task to the right processor architecture while aggressively minimizing data movement bottlenecks. While CPUs use large caches and complex logic to minimize latency for sequential tasks, GPUs use massive parallel arrays to maximize throughput for parallel workloads. However, the ultimate performance killer is data movement latency across the PCIe bus between the CPU and GPU; for small workloads, this transfer time completely eclipses the actual compute speed. Maximizing efficiency therefore relies on software-level optimization, such as avoiding warp divergence in GPU kernels so threads don't sit idle, and properly configuring PyTorch dataloaders with pinned memory and prefetching to keep the GPU continuously fed with data.
+    
+  </p>
+</div>
 # Introduction
-Let’s start from the fact that **hardware-aware** code should always take into account the type of operation being performed. For instance, code that requires highly intensive computations that cannot be parallelized should usually be run on CPU-style processors; on the contrary, an _embarrassingly parallel_ problem (so-called for the trivial way of parallelizing it) should run on GPU-style processors, as the SOTA suggests as of now.
+Hardware-aware code should always consider the type of operation being performed. For instance, code that requires highly intensive computations that cannot be parallelized should typically run on CPU-style processors; conversely, an embarrassingly parallel problem (so-called for its trivial parallelization) should run on GPU-style processors, as current state-of-the-art (SOTA) suggests.
 # Paradigms of computation
 Given these premises, it's of uttermost importance mentioning paradigms of computation that are commonly used in hardware-aware programming.
 
@@ -384,3 +389,4 @@ The most insightful data comes from the **Breakdown** graphs (**H2D**: Host-to-D
 - **Library Efficiency:** CuPy performs better here likely due to its highly optimized underlying C++/CUDA kernels, whereas a custom Numba kernel requires careful manual tuning to reach peak performance.
     
 - **Minimize Movement:** To maximize efficiency in a real-world pipeline, data should remain on the GPU between operations to avoid repeating these expensive H2D and D2H transfers.
+
