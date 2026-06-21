@@ -40,7 +40,10 @@ $$L(X, Y, Z, \psi, \phi)$$
 
 It now asks: 
 
+<figure>
 <img src="/images/radiance-fields-plenoptic-function.png" alt="The plenoptic function asks what color is seen from a given 3D point and viewing angle" width="694" />
+<figcaption aria-hidden="true">The plenoptic function answers a single question for every point and direction in space: standing at $(x,y,z)$ and looking toward $(\theta,\phi)$, what color do you see?</figcaption>
+</figure>
 
 It asks the question: **"If I am standing at a specific point in 3D space $(x,y,z)$, and I look in a specific angular direction $(\theta,\phi)$, what color do I see?"**
 
@@ -83,7 +86,10 @@ In a traditional renderer, a this is determined by a conditional check:
 
 Mathematically, this is a step function that is obviously not differentiable.
 
+<figure>
 <img src="/images/radiance-fields-differentiable-rendering.webp" alt="Differentiable rendering vs. a non-differentiable step function in traditional rasterization" width="600" />
+<figcaption aria-hidden="true">Traditional Z-buffer rasterization decides pixel color with a hard if/else step function — not differentiable. Differentiable rendering replaces that hard switch with a smooth function so gradients can flow back to scene parameters.</figcaption>
+</figure>
 # Neural Radiance Fields
 
 In contrast to explicit representations, **Neural Radiance Fields (NeRF)** represent a scene implicitly through a continuous function $F_\Theta$, typically parameterized by a multilayer perceptron (MLP). 
@@ -101,13 +107,19 @@ where $T(t)$ represents the accumulated transmittance along the ray from $t_n$ t
 
 $$T(t) = \exp\left( -\int_{t_n}^{t} \sigma(\mathbf{r}(s)) ds \right)$$
 
+<figure>
 <img src="/images/radiance-fields-volume-rendering-integral.webp" alt="NeRF volume rendering integral along a camera ray" />
+<figcaption aria-hidden="true">Color along a camera ray is the integral of density and color, weighted by accumulated transmittance — the farther light travels through dense material before reaching a point, the less it contributes to the final pixel.</figcaption>
+</figure>
 
 ### Numerical Integration via Quadrature
 
 In practice, this continuous integral is estimated using quadrature by sampling $N$ points along the ray.
 
+<figure>
 <img src="/images/radiance-fields-quadrature-sampling.webp" alt="Estimating the rendering integral via quadrature by sampling N points along the ray" width="479" />
+<figcaption aria-hidden="true">In practice the continuous integral can't be solved analytically, so it's approximated by summing over N discrete samples placed along the ray.</figcaption>
+</figure>
 
 The discretized rendering equation becomes:
 
@@ -149,7 +161,10 @@ The "Fine" MLP is then evaluated using the total set of  samples.
 
 Because the samples are now concentrated around the actual geometry of the scene, the fine network can capture much more detail, sharper edges, and more accurate textures than the coarse network alone.
 
+<figure>
 <img src="/images/radiance-fields-hierarchical-sampling.webp" alt="Hierarchical volume sampling with coarse and fine networks" width="489" />
+<figcaption aria-hidden="true">The coarse network's density estimate builds a probability map of where the surface likely is; the fine network then concentrates its samples there instead of wasting them on empty space.</figcaption>
+</figure>
 
 
 ## Architectural & Parameter Breakdown
@@ -174,7 +189,10 @@ So at the end the number of trainable parameters are:
 
 > **Total Parameter Count For Vanilla NeRF:** **~528,132**
 
+<figure>
 <img src="/images/radiance-fields-nerf-mlp.gif" alt="Animated breakdown of the vanilla NeRF MLP architecture" width="697" />
+<figcaption aria-hidden="true">Vanilla NeRF's MLP: an 8-layer, 256-wide trunk predicts density, then a small head fuses in viewing direction to predict view-dependent color — roughly half a million trainable parameters in total.</figcaption>
+</figure>
 
 While the model itself is lightweight, the memory dynamics shift drastically once training begins. 
 
@@ -251,7 +269,10 @@ This hybrid approach combines:
 1.  **Ray Tracing:** For high-frequency, near-field details.
 2.  **Neural Caching (via fused kernels):** For complex, multi-bounce global illumination that would otherwise be too noisy or slow to compute in real-time.
 
+<figure>
 <img src="/images/radiance-fields-neural-radiance-caching.webp" alt="Neural Radiance Caching as a short-circuit for real-time path tracing" />
+<figcaption aria-hidden="true">Instead of tracing a ray through 10+ light bounces, NRC traces only 2 and lets a tiny fused MLP "predict" the remaining indirect light, trading a small amount of accuracy for real-time latency.</figcaption>
+</figure>
 
 ### Kernel Launch and Memory Overhead
 
@@ -259,11 +280,17 @@ In a standard MLP implementation, each layer (Linear, ReLU, etc.) involves a sep
 1.  **Launch Overhead:** The time spent by the CPU telling the GPU to start a kernel becomes a significant percentage of the total execution time.
 2.  **VRAM Round-trips:** Each layer reads its input from Global Memory (VRAM) and writes its output back to VRAM. Since small MLPs are "memory-bound," the GPU spends more time moving data than actually performing the math.
 
+<figure>
 <img src="/images/radiance-fields-kernel-launch-overhead.webp" alt="Kernel launch overhead and VRAM round-trips for small MLPs" />
+<figcaption aria-hidden="true">Each layer of a small MLP normally launches its own CUDA kernel and round-trips through VRAM, so for tiny networks the overhead of moving data dwarfs the actual matrix multiplication.</figcaption>
+</figure>
 
 Usually, with that compute it can make sense to focus on computation but on modern GPUs on small numbers of neurons the memory traffic impacts the performances a lot, so the idea behind was pretty simple, we can allocate wisely the blocks for the matrix multiplication in order to avoid loading from RAM each time we have to perform an activation.
 
+<figure>
 <img src="/images/radiance-fields-fused-mlp-memory.webp" alt="Fusing layers to keep activations in registers/shared memory instead of round-tripping VRAM" />
+<figcaption aria-hidden="true">By keeping every layer's activations in fast on-chip registers or shared memory instead of writing back to VRAM after each layer, fused MLP kernels shift the bottleneck from memory bandwidth to raw compute.</figcaption>
+</figure>
 
 That's what happens here, basically each parallel stream is loaded only once from RAM, for this reason it makes the computational overhead of getting the data from Global Memory significantly lower, as the GPU avoids redundant read/write cycles and instead performs all operations within high-speed registers or Shared Memory, effectively shifting the bottleneck from memory bandwidth to the raw compute throughput of the streaming multiprocessors.
 ## Instant-NGP
@@ -285,7 +312,10 @@ Because the hash table does most of the "heavy lifting" by providing rich spatia
 
 ### Multi-Resolution Hashing
 
+<figure>
 <img src="/images/radiance-fields-multires-hash-encoding.webp" alt="Multi-resolution hash encoding used by Instant-NGP" width="697" />
+<figcaption aria-hidden="true">Instant-NGP looks up and interpolates features from a hierarchy of grid resolutions, each backed by its own fixed-size hash table, instead of asking an MLP to memorize the whole scene.</figcaption>
+</figure>
 
 **Instant-NGP** introduces **Multi-Resolution Hash Encoding**, which stores scene features in a hierarchy of $L$ grid levels. For an input 3D coordinate $\mathbf{x}$, the system identifies the surrounding voxels at each resolution level $l \in [0, L-1]$. 
 The resolution $N_l$ of each level typically follows a geometric progression between a minimum resolution $N_{min}$ and a maximum resolution $N_{max}$:
@@ -367,7 +397,10 @@ When you process a batch of **262,144 points**, many of these points will fall i
 
 If the hash table size $T$ is significantly lower than the number of points sampled in a batch (e.g., $T=16k$ while samples = $262k$), the "collisions" become too frequent, and the MLP may struggle to resolve the ambiguity, leading to "ghosting" artifacts or a loss of fine detail in the reconstruction.
 
+<figure>
 <img src="/images/radiance-fields-hash-collisions.webp" alt="Hash collisions across resolution levels in Instant-NGP" />
+<figcaption aria-hidden="true">At fine resolutions, many more grid vertices than table entries inevitably collide — but because collisions rarely line up across every resolution level at once, the MLP can usually still disambiguate the surface.</figcaption>
+</figure>
 
 # GNeRFs
 
@@ -407,7 +440,10 @@ The fundamental shift in pixelNeRF is that the MLP is no longer just a function 
 
 
 
+<figure>
 <img src="/images/radiance-fields-pixelnerf-comparison.webp" alt="pixelNeRF conditions the MLP on local image features extracted from a CNN" />
+<figcaption aria-hidden="true">pixelNeRF projects each 3D query point back onto the input images and conditions the MLP on the local CNN features found there, letting it generalize to new scenes from as little as one image.</figcaption>
+</figure>
 ## MVSNeRF
 
 **MVSNeRF** (Multi-View Stereo Neural Radiance Fields) is a generalizable neural rendering approach that, like pixelNeRF, aims to reconstruct new scenes without the lengthy per-scene optimization required by vanilla NeRF. 
@@ -443,7 +479,10 @@ MVSNeRF is designed to optimize the data flow:
 | **Storage**           | Small (MLP weights)      | Large (Cost Volume / Voxel grid)             |
 
 
+<figure>
 <img src="/images/radiance-fields-mvsnerf.webp" alt="MVSNeRF builds a 3D cost volume from multi-view stereo to provide a geometric roadmap" />
+<figcaption aria-hidden="true">MVSNeRF warps CNN features from a few nearby views into a 3D cost volume via plane sweeping, giving the MLP an explicit geometric roadmap instead of making it learn structure from scratch.</figcaption>
+</figure>
 # Gaussian Splatting
 
 Moving from implicit functions to explicit representations, **3D Gaussian Splatting** represents the scene using a collection of millions of learnable 3D Gaussians.
@@ -478,7 +517,10 @@ $$C = \sum_{i=1}^{N} \mathbf{c}_i \alpha'_i \prod_{j=1}^{i-1} (1 - \alpha'_j)$$
 
 where $\mathbf{c}_i$ is the color of the $i$-th Gaussian (typically represented using Spherical Harmonics to capture view-dependency) and $\alpha'_i$ is the effective opacity, calculated by multiplying the base opacity $\alpha_i$ by the Gaussian's 2D spatial influence $g'(\mathbf{x})$. This explicit formulation allows to bypass the expensive MLP evaluations required by NeRF, enabling real-time rendering speeds through highly optimized tile-based rasterization.
 
+<figure>
 <img src="/images/radiance-fields-gaussian-splatting-rasterization.webp" alt="3D Gaussians projected and alpha-blended via tile-based rasterization" />
+<figcaption aria-hidden="true">3D Gaussians are projected into 2D "splats" and alpha-blended in depth order — mathematically equivalent to NeRF's volume rendering, but computed by rasterizing explicit primitives instead of querying an MLP.</figcaption>
+</figure>
 
 ## Training
 
@@ -513,7 +555,10 @@ In the context of 3D Gaussian Splatting, Radix sort is preferred over other algo
 - **Data Locality:** Radix sort minimizes random memory access. By sorting the Gaussians globally or per-tile, it ensures that the subsequent rasterization stage reads Gaussian data from VRAM in a linear, coalesced fashion.
 - **Predictable Performance:** Unlike QuickSort, which has a worst-case $O(n^2)$ complexity depending on the initial order, Radix sort always performs the same number of operations regardless of how the Gaussians are distributed in 3D space.
 
+<figure>
 <img src="/images/radiance-fields-radix-sort.gif" alt="Radix sort ordering Gaussians by depth for correct alpha blending" />
+<figcaption aria-hidden="true">Radix sort buckets Gaussians by the bits of their depth key in linear time, giving the GPU's parallel SIMT architecture a stable, coalesced ordering for correct alpha blending of millions of primitives per frame.</figcaption>
+</figure>
 
 # Plenoxels
 
@@ -561,4 +606,7 @@ Here is how the methods highlighted in your article align from purely explicit t
 
 This line effectively tracks the trade-off between **Storage/Speed** (Explicit) and **Memory Efficiency/Continuity** (Implicit).
 
+<figure>
 <img src="/images/radiance-fields-spectrum-summary.webp" alt="The radiance field spectrum from purely explicit to purely implicit representations" />
+<figcaption aria-hidden="true">The full spectrum from purely explicit (3DGS, Plenoxels) through hybrid (Instant-NGP, MVSNeRF, pixelNeRF) to purely implicit (vanilla NeRF) — trading storage and speed against memory efficiency and continuity.</figcaption>
+</figure>
