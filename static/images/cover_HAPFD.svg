@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2752" height="1200" viewBox="0 0 2752 1200">
+  <rect width="2752" height="1200" fill="#1b170b"/>
+  <g fill="none" stroke="#ece0c6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- CPU (left, small: latency core) -->
+    <rect x="420" y="420" width="360" height="360" rx="36" stroke-width="12"/>
+    <rect x="490" y="490" width="220" height="220" rx="20" stroke-width="10"/>
+    <circle cx="522" cy="522" r="10" fill="#ece0c6" stroke="none"/>
+    <!-- CPU pins: 6 per side -->
+    <g stroke-width="9">
+      <path d="M476 420v-46M532 420v-46M588 420v-46M644 420v-46M700 420v-46M756 420v-46"/>
+      <path d="M476 780v46M532 780v46M588 780v46M644 780v46M700 780v46M756 780v46"/>
+      <path d="M420 476h-46M420 532h-46M420 588h-46M420 644h-46M420 700h-46M420 756h-46"/>
+      <path d="M780 476h46M780 532h46M780 588h46M780 644h46M780 700h46M780 756h46"/>
+    </g>
+    <!-- GPU (right, large: throughput array) -->
+    <rect x="1772" y="320" width="560" height="560" rx="48" stroke-width="12"/>
+    <g stroke-width="10">
+      <rect x="1842" y="390" width="200" height="200" rx="24"/>
+      <rect x="2082" y="390" width="200" height="200" rx="24"/>
+      <rect x="1842" y="630" width="200" height="200" rx="24"/>
+      <rect x="2082" y="630" width="200" height="200" rx="24"/>
+    </g>
+    <!-- GPU pins: 9 top/bottom, 7 per side -->
+    <g stroke-width="9">
+      <path d="M1832 320v-52M1912 320v-52M1992 320v-52M2072 320v-52M2152 320v-52M2232 320v-52M1832 880v52M1912 880v52M1992 880v52M2072 880v52M2152 880v52M2232 880v52"/>
+      <path d="M1772 392h-52M1772 472h-52M1772 552h-52M1772 632h-52M1772 712h-52M1772 792h-52M2332 392h52M2332 472h52M2332 552h52M2332 632h52M2332 712h52M2332 792h52"/>
+    </g>
+  </g>
+  <!-- The bus: single gold bottleneck line (accent) -->
+  <line x1="786" y1="600" x2="1772" y2="600" stroke="#c9a84c" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="786" cy="600" r="9" fill="#c9a84c"/>
+</svg>

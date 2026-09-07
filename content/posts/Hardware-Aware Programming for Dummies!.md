@@ -5,9 +5,9 @@ date = "2026-03-14T19:30:19+01:00"
 author = "giacolees"
 authorTwitter = "TechLees_" #do not include @
 cover = "/images/cover_HAPFD.png"
-tags = ["cpu", "gpu", "optimization"]
-keywords = ["", ""]
-description = "A Practical Journey through CPU and GPU Efficiency"
+tags = ["cpu", "gpu", "cuda", "optimization", "pytorch"]
+keywords = ["hardware-aware programming", "CPU vs GPU", "SIMD", "CUDA kernels", "warp divergence", "PyTorch DataLoader", "pinned memory"]
+description = "From scalar loops to SIMD vectorization and CUDA grids, blocks, and warps: why CPUs minimize latency while GPUs maximize throughput, how H2D/D2H data movement dominates runtime, and how to fight back with divergence-free kernels and tuned PyTorch DataLoaders."
 showFullContent = false
 readingTime = true
 hideComments = false
@@ -16,7 +16,7 @@ hideComments = false
 <div style="border-left:3px solid #c9a84c;background:#1a170f;padding:0.9rem 1.2rem;margin:1.5rem 0;border-radius:0 6px 6px 0">
   <div style="color:#c9a84c;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.6rem">TL;DR</div>
   <p style="color:#eee;margin:0;line-height:1.8">Hardware-aware programming requires matching your computational task to the right processor architecture while aggressively minimizing data movement bottlenecks. While CPUs use large caches and complex logic to minimize latency for sequential tasks, GPUs use massive parallel arrays to maximize throughput for parallel workloads. However, the ultimate performance killer is data movement latency across the PCIe bus between the CPU and GPU; for small workloads, this transfer time completely eclipses the actual compute speed. Maximizing efficiency therefore relies on software-level optimization, such as avoiding warp divergence in GPU kernels so threads don't sit idle, and properly configuring PyTorch dataloaders with pinned memory and prefetching to keep the GPU continuously fed with data.
-    
+
   </p>
 </div>
 # Introduction
@@ -29,6 +29,7 @@ Foremost, let's introduce the concept of vectorization, below are presented some
 In a standard loop, the Python interpreter must handle type-checking and list overhead for every single iteration. Vectorization offloads this to highly optimized C and assembly routines.
 
 **Iterative Approach (Scalar):**
+
 ```python
 import time
 
@@ -44,6 +45,7 @@ for i in range(size):
 ```
 
 **Vectorized Approach (NumPy):**
+
 ```python
 import numpy as np
 
@@ -54,24 +56,28 @@ start = time.time()
 # The operation is dispatched to the CPU's SIMD units
 result_np = a_np * b_np 
 ```
+
 ---
 These examples illustrate how removing explicit loops allows the underlying library (NumPy) to utilize SIMD (Single Instruction, Multiple Data) instructions instead of SISD (Single Instruction, Single Data) which is the foundational mindset needed for hardware-aware programming.
 SIMD isn't the only available paradigm, Flynn's Taxonomy describes computer architectures based on the number of concurrent instruction and data streams.
+
 ## Flynn’s Taxonomy Overview
 
-*   **SISD (Single Instruction, Single Data stream)**
-    *   A single processor executes a single instruction stream to operate on data stored in a single memory.
+* **SISD (Single Instruction, Single Data stream)**
+  * A single processor executes a single instruction stream to operate on data stored in a single memory.
 
-*   **SIMD (Single Instruction, Multiple Data stream)**
-    *   A single instruction is broadcast to multiple processing elements, each operating on different data points simultaneously.
+* **SIMD (Single Instruction, Multiple Data stream)**
+  * A single instruction is broadcast to multiple processing elements, each operating on different data points simultaneously.
 
-*   **MISD (Multiple Instruction, Single Data stream)**
-    *   Multiple instructions operate on the same data stream. This architecture is relatively rare in general computing and is typically used for fault tolerance or specialized digital signal processing.
+* **MISD (Multiple Instruction, Single Data stream)**
+  * Multiple instructions operate on the same data stream. This architecture is relatively rare in general computing and is typically used for fault tolerance or specialized digital signal processing.
 
-*   **MIMD (Multiple Instruction, Multiple Data stream)**
-    *   Multiple autonomous processors simultaneously execute different instructions on different data.
+* **MIMD (Multiple Instruction, Multiple Data stream)**
+  * Multiple autonomous processors simultaneously execute different instructions on different data.
 ![](/images/Gemini_Generated_Image_e32qlxe32qlxe32q.png)
+
 # What is a GPU?
+
 A GPU is **a specialized parallel processor** designed to perform rapid mathematical calculations, particularly those needed for rendering images, videos, and animations.
 As you can sense, all the tasks mentioned before requires highly intensive parallel processing and indeed GPUs are optimized for **parallel processing**, so executing many operations simultaneously on different devices (the concept of devices will be cleared in the next sections), making algorithm optimized for GPU part of the family of MIMD computations.
 The architectures for both CPU and GPU cores are illustrated in the figure below.
@@ -83,8 +89,8 @@ On the other hand, **GPU hardware** dedicates the majority of its silicon to P
 
 The architecture of a modern GPU is defined by a hierarchical relationship between memory and compute units. At the base, the **Global Memory**—typically labeled as **DRAM**—serves as the primary storage hub, linked to multiple matrices of Processing Elements (PEs). In most standard architectural nomenclature, these matrices are referred to as **Streaming Multiprocessors (SMs)**.
 Each SM operates as a self-contained unit, equipped with its own dedicated resources to manage localized workloads:
-- **Shared Memory:** Facilitates high-speed data exchange between the PEs within a specific block.
-- **Registers:** Provides the immediate, low-latency workspace required for active threads.
+* **Shared Memory:** Facilitates high-speed data exchange between the PEs within a specific block.
+* **Registers:** Provides the immediate, low-latency workspace required for active threads.
 The specific count and dimensions of these components are dictated by the underlying architecture. Over the years, it is fair to say that these specifications have increased "just a bit"—evolving from modest parallel cores to the massive, high-density arrays we see in cutting-edge hardware today.
 A low-level representation of the PE is then provided, illustrating how a single Processing Element is further decomposed into multiple sub-units, each dedicated to a specific computational task.
 ![](/images/Screenshot%202026-02-11%20at%204.40.31%20PM.png)
@@ -108,6 +114,7 @@ MFU is the ratio between the actual math our GPU performed, in terms of FLOPs in
 $$\text{MFU} = \frac{\text{Achieved TFLOPS}}{\text{Peak TFLOPS for the Precision}}$$
 To test A100's efficiency, we can benchmark a large square matrix multiplication ($C = A \times B$).
 This is the most "pure" way to test MFU because it minimizes the messy CPU overhead and focuses entirely on the GPU's execution units.
+
 ### Results
 
 > Benchmarking torch.bfloat16 on NVIDIA A100-SXM4-40GB
@@ -121,6 +128,7 @@ This is the most "pure" way to test MFU because it minimizes the messy CPU overh
 > **Avg Time:** 57.39 ms
 > **Achieved:** 19.16 TFLOPS
 > **MFU:** 98.26%
+>
 # GPU Programming Basics
 
 In order to abstract the underlying hardware, GPU programming presents a hierarchical structure at the software level. At the top of this hierarchy is the **Grid**, which represents the entire execution space for a specific **Kernel**. We will talk about kernels shortly; for now, think of them as the basic functions of GPU programming.
@@ -138,13 +146,14 @@ If the Grid, Blocks, and Threads are the "workers," the **Kernel** is the "set o
 As you might have guessed, while every thread runs the same code, they don't do the same work. They use the hierarchy defined in the kernel to determine their unique identity. The kernel is a template; it doesn't know about your specific data (like "pixel 400" or "matrix row 5") until it runs. It only knows logic.
 
 Inside the kernel code, each thread looks at the hardware registers to calculate its unique **Global ID**:
-- Which **Block** am I in? (`blockIdx`)
-- Which **Thread** inside that block am I? (`threadIdx`)
-- How big are the blocks? (`blockDim`)
+* Which **Block** am I in? (`blockIdx`)
+* Which **Thread** inside that block am I? (`threadIdx`)
+* How big are the blocks? (`blockDim`)
 The formula for the unique index is:
 
 $$\text{Global ID} = (\text{blockIdx} \times \text{blockDim}) + \text{threadIdx}$$
 ![](/images/opeclmap4.png)
+
 ### Warp Divergence
 
 When you launch the kernel, the hardware groups threads into Warps. If your kernel contains an `if/else` statement where half the threads in a Warp take the `if` path and the other half take the `else` path, they can no longer run in parallel. This is called **Warp Divergence**.
@@ -237,6 +246,7 @@ Blocks share the same memory, so it makes sense to avoid communication between d
 
 The same holds for GPU Global Memory and Central Memory on the CPU; the objective is always to avoid data movement.
 In an ideal case, we would have all the data we require in the right place at the right time.
+
 # PyTorch and Use Cases
 
 Maybe you've heard about this magic framework that lets you build the next SoTA LLM with zero effort, just by describing it in a Pythonic way. It sounds like a bargain. Well, like everything in computer science, it _only_ seems that way.
@@ -245,16 +255,17 @@ PyTorch is just a very fine abstraction over a massive pile of C++ and CUDA code
 
 This simplified breakdown illustrates how PyTorch's internal architecture actually processes a basic operation:
 
-- **User Code:** You type `z = x + y` in Python and hit run. In reality, you are submitting a high-level work order to a low-level language.
-    
-- **PyTorch Dispatcher:** That central framework (**c10**) catches your code and instantly checks your tensors in order to route them to the suitable underlying backend.
-    
-    - **CPU Backend:** If you forgot to call `.to('cuda')`—and let's be honest, you probably did—the Dispatcher sends the job to libraries **such** as Intel's MKL or oneDNN. They will give you a truly slow computation, but at the end of the day, they're also software with emotions, so don't bully them.
-        
-    - **GPU Backend:** If you actually paid for an NVIDIA GPU, the Dispatcher hands the job off to cuBLAS or Triton, which will parallelize the math across thousands of cores, burning enough electricity to dim your neighborhood just so your loss curve can plateau faster.
-        
-- **Autograd Engine:** If `requires_grad=True` is enabled, this engine acts as a wiretap, aggressively logging every single operation into a massive computation graph. When you inevitably call `.backward()`, it can magically spit out the chain rule math.
+* **User Code:** You type `z = x + y` in Python and hit run. In reality, you are submitting a high-level work order to a low-level language.
+
+* **PyTorch Dispatcher:** That central framework (**c10**) catches your code and instantly checks your tensors in order to route them to the suitable underlying backend.
+
+  * **CPU Backend:** If you forgot to call `.to('cuda')`—and let's be honest, you probably did—the Dispatcher sends the job to libraries **such** as Intel's MKL or oneDNN. They will give you a truly slow computation, but at the end of the day, they're also software with emotions, so don't bully them.
+
+  * **GPU Backend:** If you actually paid for an NVIDIA GPU, the Dispatcher hands the job off to cuBLAS or Triton, which will parallelize the math across thousands of cores, burning enough electricity to dim your neighborhood just so your loss curve can plateau faster.
+
+* **Autograd Engine:** If `requires_grad=True` is enabled, this engine acts as a wiretap, aggressively logging every single operation into a massive computation graph. When you inevitably call `.backward()`, it can magically spit out the chain rule math.
 ![](/images/Gemini_Generated_Image_c67ng8c67ng8c67n.png)
+
 ## Use Case: PyTorch Dataset
 
 So, we’ve understood: PyTorch is not easy, and the bottleneck on GPUs is usually data movement—_bla bla bla_.
@@ -273,11 +284,13 @@ When the GPU wants data, it can't just grab it. The CPU first has to move that d
 When you tell PyTorch to map the data directly into **Pinned RAM** to begin with, the GPU grabs it instantly, saving precious milliseconds of CPU overhead. Of course, the downside is that Pinned Memory is "expensive." You need enough physical RAM to hold these locked buffers, and the time spent "pinning" that memory needs to be lower than the time you'd lose shuffling it around later. If you over-allocate, your OS will start choking on the remaining pageable memory, and you'll be right back to a slow, messy epoch.
 
 ![](/images/pinmem.png)
+
 ### Prefetch Factor
 
 The **Prefetch Factor** determines how many _batches_ each worker process should have standing in line, ready to go, before the GPU even asks for them. Usually, your GPU finishes a batch and then waits for the CPU to start loading the next one. If you have `num_workers=4` and `prefetch_factor=2`, your CPU will proactively keep 8 batches sitting in RAM at all times. The moment the GPU finishes `Batch N`, `Batch N+1` is already moving across the PCIe bus.
 
 ![](/images/Gemini_Generated_Image_mpwobtmpwobtmpwo.png)
+
 ### The Benchmark Paradox
 
 To address this, let's look at a benchmark using Optuna with a TPE strategy on a toy model:
@@ -318,17 +331,19 @@ In contrast, running the same network with `pin_memory=True`: `Epoch 0: 100%|█
 The computation becomes faster with `pin_memory=True`, despite the initial benchmark suggesting `False`. These 8 seconds of gain might not seem like much, but at scale, it’s a different story.
 
 The slight speedup during training tells us that computation requires significantly more time than data movement in this specific case. The overhead of organizing pinned memory makes the very first iterations slower, but in the long run, the performance is superior.
+
 # Kernels and Benchmark with CPU
 
 At the end of this gentle introduction to hardware programming, I will offer some simple ways to compute a trivial operation, such as a convolution with a **3x3 symmetric kernel** (which is identical to a correlation operation).
 
 There are three versions of the operation presented, using different libraries to highlight their architectural differences:
 
-- **Numba Kernel:** Provides complete control over the workflow. It is the library that best emulates the CUDA programming model, offering a low-level interface with the underlying hardware.
-    
-- **Naive CPU Version:** Represents the standard approach for computing operations using plain Python or NumPy on a single processor.
-    
-- **CuPy:** A GPU-accelerated library that mirrors the NumPy/SciPy API. In this example, it utilizes an optimized GPU implementation of the `correlate2d` function.
+* **Numba Kernel:** Provides complete control over the workflow. It is the library that best emulates the CUDA programming model, offering a low-level interface with the underlying hardware.
+
+* **Naive CPU Version:** Represents the standard approach for computing operations using plain Python or NumPy on a single processor.
+
+* **CuPy:** A GPU-accelerated library that mirrors the NumPy/SciPy API. In this example, it utilizes an optimized GPU implementation of the `correlate2d` function.
+
 ### NUMBA CUDA KERNEL
 
 ```python
@@ -348,6 +363,7 @@ def conv3x3_kernel(inp, out, k):
                 s += k[di, dj] * inp[i+di, j+dj]
         out[i, j] = s
 ```
+
 ### CPU NAIVE
 
 ```Python
@@ -362,6 +378,7 @@ def conv3x3_cpu(inp, kernel, out):
                     s += kernel[di, dj] * inp[i+di, j+dj]
             out[i, j] = s
 ```
+
 ### CUPY IMPLEMENTATION
 
 ```python
@@ -382,11 +399,10 @@ As illustrated, the **Execution Time** and **Speedup** charts tell a clear story
 
 The most insightful data comes from the **Breakdown** graphs (**H2D**: Host-to-Device; **D2H**: Device-to-Host). For both Numba and CuPy, the actual **Compute** time (the orange bars) is almost negligible compared to the time spent moving data. **H2D (Blue)** is the primary bottleneck. This confirms that for small images (e.g., $64 \times 64$), the GPU may offer little to no benefit because the time spent "sending the image to the card" outweighs the raw processing speed.
 
-### Key Takeaways:
+### Key Takeaways
 
-- **Scale Matters:** GPU acceleration is a "high-overhead" strategy. It is only advantageous when the computational complexity is high enough to justify the data transfer penalty.
-    
-- **Library Efficiency:** CuPy performs better here likely due to its highly optimized underlying C++/CUDA kernels, whereas a custom Numba kernel requires careful manual tuning to reach peak performance.
-    
-- **Minimize Movement:** To maximize efficiency in a real-world pipeline, data should remain on the GPU between operations to avoid repeating these expensive H2D and D2H transfers.
+* **Scale Matters:** GPU acceleration is a "high-overhead" strategy. It is only advantageous when the computational complexity is high enough to justify the data transfer penalty.
 
+* **Library Efficiency:** CuPy performs better here likely due to its highly optimized underlying C++/CUDA kernels, whereas a custom Numba kernel requires careful manual tuning to reach peak performance.
+
+* **Minimize Movement:** To maximize efficiency in a real-world pipeline, data should remain on the GPU between operations to avoid repeating these expensive H2D and D2H transfers.
