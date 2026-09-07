@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2752" height="1200" viewBox="0 0 2752 1200">
+  <rect width="2752" height="1200" fill="#1b170b"/>
+  <!-- Agent (circle, left) -->
+  <circle cx="824" cy="600" r="190" fill="none" stroke="#ece0c6" stroke-width="12"/>
+  <circle cx="824" cy="600" r="7" fill="#ece0c6"/>
+  <!-- Environment (rounded square, right) -->
+  <rect x="1738" y="410" width="380" height="380" rx="48" fill="none" stroke="#ece0c6" stroke-width="12"/>
+  <circle cx="1928" cy="600" r="55" fill="none" stroke="#ece0c6" stroke-width="10"/>
+  <circle cx="1928" cy="600" r="7" fill="#ece0c6"/>
+  <!-- Top arc: action (agent -> environment), gold accent -->
+  <path d="M958 458 C 1250 330, 1470 330, 1722 440" fill="none" stroke="#c9a84c" stroke-width="12" stroke-linecap="round"/>
+  <polyline points="1691,445 1722,440 1700,418" fill="none" stroke="#c9a84c" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Bottom arc: reward/observation (environment -> agent), cream -->
+  <path d="M1722 760 C 1470 870, 1250 870, 958 742" fill="none" stroke="#ece0c6" stroke-width="10" stroke-linecap="round"/>
+  <polyline points="1004,744 958,742 1001,772" fill="none" stroke="#ece0c6" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
