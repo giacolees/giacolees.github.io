@@ -9,13 +9,6 @@ I'm what people charitably call a **T-shaped engineer**. The vertical bar goes d
 
 I write here about the things I build and the things I learn, usually in that order, occasionally in reverse.
 
-## Tech Stack & Workflow
-
-I build most things around Python, PyTorch, and whatever the problem demands, scripted together in a terminal I've spent more time configuring than is probably healthy.
-
-- [python-agent-template](https://github.com/giacolees/python-agent-template) — my starting point for projects based on agentic AI workflows
-- [dotfiles](https://github.com/giacolees/dotfiles) — the shell, editor, and terminal config I carry between machines
-
 And now, a classic!
 
 <pre id="donut-ascii" style="font-family:monospace;font-size:0.6rem;line-height:1.15;color:#c9a84c;background:transparent;overflow:hidden;"></pre>

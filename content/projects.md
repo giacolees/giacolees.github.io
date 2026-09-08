@@ -79,12 +79,6 @@ Dotfiles, terminal setup, and AI-agent workflow tooling.
 <div style="margin-top:0.5rem;font-size:0.75rem;opacity:0.6;">Shell · herdr · Ghostty · macOS</div>
 </div>
 
-<div style="border:1px solid var(--accent);padding:1rem;">
-<a href="https://github.com/giacolees/plan-herdr-subagents" target="_blank" rel="noopener" style="font-weight:bold;color:var(--accent);text-decoration:none;">plan-herdr-subagents ↗</a>
-<p style="margin:0.4rem 0 0;font-size:0.9rem;opacity:0.8;">Single pi package for the entire /plan grill-and-plan workflow — grilling + domain-modeling → pointer plan → sequential workers → reviewer on herdr subagents.</p>
-<div style="margin-top:0.5rem;font-size:0.75rem;opacity:0.6;">TypeScript · pi · Subagents · Planning</div>
-</div>
-
 </div>
 
 ## Side Projects
@@ -95,6 +89,12 @@ Dotfiles, terminal setup, and AI-agent workflow tooling.
 <a href="https://github.com/giacolees/openFanta-draft" target="_blank" rel="noopener" style="font-weight:bold;color:var(--accent);text-decoration:none;">openFanta-draft ↗</a>
 <p style="margin:0.4rem 0 0;font-size:0.9rem;opacity:0.8;">Tools for the Fantacalcio (Italian fantasy football) 2026/27 auction — listone import, TIX/FIX player indexes, all managed with uv.</p>
 <div style="margin-top:0.5rem;font-size:0.75rem;opacity:0.6;">Python · uv · Data Analysis</div>
+</div>
+
+<div style="border:1px solid var(--accent);padding:1rem;">
+<a href="https://github.com/giacolees/my-wellness-coach" target="_blank" rel="noopener" style="font-weight:bold;color:var(--accent);text-decoration:none;">Vita — my-wellness-coach ↗</a>
+<p style="margin:0.4rem 0 0;font-size:0.9rem;opacity:0.8;">Your private wellness companion: gym, diet, shopping & activities. Single-owner, self-hosted — no cloud account required.</p>
+<div style="margin-top:0.5rem;font-size:0.75rem;opacity:0.6;">TypeScript · Self-hosted · Health</div>
 </div>
 
 </div>
