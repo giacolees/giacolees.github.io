@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../site';
+import { sections } from '../topics';
+interface Props { posts: CollectionEntry<'posts'>[]; }
+const { posts } = Astro.props;
+---
+<ol class="posts">{posts.map(post => <li class="post"><div class="post-date"><img src="/icons/document.svg" width="24" height="28" alt="" /><time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time></div><div><h3><a href={`/posts/${post.id}/`}>{post.data.title}</a></h3><p>{post.data.description}</p><div class="post-meta"><a href={`/sections/${post.data.section}/`}>{sections[post.data.section].title}</a>{post.data.sample && <span>Sample post</span>}{post.data.updated && <span>Updated <time datetime={formatDate(post.data.updated)}>{formatDate(post.data.updated)}</time></span>}</div></div></li>)}</ol>
+<script>
+  const preference = matchMedia('(prefers-reduced-motion: reduce)');
+  const posts = document.querySelectorAll<HTMLElement>('.post');
+  if (!preference.matches && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.remove('reveal-pending'); observer.unobserve(entry.target); }
+    }), { threshold: 0.1 });
+    posts.forEach(post => { post.classList.add('reveal-pending'); observer.observe(post); });
+    preference.addEventListener('change', () => { if (preference.matches) { observer.disconnect(); posts.forEach(post => post.classList.remove('reveal-pending')); } });
+  }
+</script>

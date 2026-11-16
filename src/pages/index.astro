@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { sections } from '../topics';
+import { site } from '../site';
+const posts = (await getCollection('posts')).sort((a,b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base>
+  <section class="intro"><div class="intro-heading"><h1>{site.heading}</h1><img class="globe" src="/icons/globe.png" width="60" height="60" alt="" /></div><p class="subtitle">{site.description}</p></section>
+  <section class="topics" aria-labelledby="topics-title"><h2 id="topics-title">Explore by topic</h2><div class="topic-grid">{Object.entries(sections).map(([id, section]) => <a class="topic-card" href={`/sections/${id}/`}><h3>{section.title}</h3><p>{section.description}</p><span class="sample">{posts.filter(post => post.data.section === id).length} entries →</span></a>)}</div><p class="browse-tags"><a href="/tags/">Browse all tags →</a></p></section>
+  <section aria-labelledby="recent"><div class="section-heading"><h2 id="recent">Recent writing</h2><span class="eyebrow">{String(posts.length).padStart(2,'0')} entries</span></div>
+    <PostList posts={posts} />
+  </section>
+</Base>

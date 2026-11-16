@@ -1,0 +1,35 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { formatDate } from '../../site';
+import { sections, tagUrl } from '../../topics';
+export async function getStaticPaths() { return (await getCollection('posts')).map(post => ({ params: { id: post.id }, props: { post } })); }
+const { post } = Astro.props;
+const { Content } = await render(post);
+const ordered = (await getCollection('posts')).sort((a,b) => a.data.date.valueOf() - b.data.date.valueOf());
+const index = ordered.findIndex(entry => entry.id === post.id);
+const previous = ordered[index - 1];
+const next = ordered[index + 1];
+---
+<Base title={post.data.title} description={post.data.description}>
+  <div class="reading-progress" aria-hidden="true"></div>
+  <article class="article"><header class="article-header"><p class="eyebrow"><time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>{post.data.sample && ' / Sample post'}</p><p class="article-topic"><a href={`/sections/${post.data.section}/`}>{sections[post.data.section].title}</a></p><h1>{post.data.title}</h1><p class="subtitle">{post.data.description}</p>{post.data.updated && <p class="updated">Updated <time datetime={formatDate(post.data.updated)}>{formatDate(post.data.updated)}</time></p>}{post.data.tags && <ul class="tag-links" aria-label="Article tags">{post.data.tags.map(tag => <li><a href={tagUrl(tag)}>#{tag}</a></li>)}</ul>}</header><div class="prose" id="article-body"><Content /></div><nav class="article-pagination" aria-label="More writing"><div>{previous && <a rel="prev" href={`/posts/${previous.id}/`}><span class="sample">← Previous article</span><span>{previous.data.title}</span></a>}</div><div>{next && <a rel="next" href={`/posts/${next.id}/`}><span class="sample">Next article →</span><span>{next.data.title}</span></a>}</div></nav><p class="back"><a href="/">← All writing</a></p></article>
+</Base>
+<script>
+  const body = document.querySelector<HTMLElement>('#article-body');
+  const bar = document.querySelector<HTMLElement>('.reading-progress');
+  let scheduled = false;
+  function update() {
+    scheduled = false;
+    if (!body || !bar) return;
+    const rect = body.getBoundingClientRect();
+    const distance = rect.height - innerHeight;
+    const progress = distance > 0 ? -rect.top / distance : (innerHeight - rect.top) / rect.height;
+    bar.style.transform = `scaleX(${Math.max(0, Math.min(1, progress))})`;
+  }
+  function schedule() { if (!scheduled) { scheduled = true; requestAnimationFrame(update); } }
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', schedule);
+  new ResizeObserver(schedule).observe(body!);
+  schedule();
+</script>

@@ -1,0 +1,8 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { tagUrl } from '../../topics';
+const posts = await getCollection('posts');
+const tags = [...new Set(posts.flatMap(post => post.data.tags ?? []))].sort();
+---
+<Base title="Tags" description="Browse the notebook by tag."><section class="article prose"><p class="eyebrow">Notebook index</p><h1>Browse by tag</h1><p>Follow a thread across different topics.</p><ul class="tag-index">{tags.map(tag => <li><a href={tagUrl(tag)}>{tag}</a> <span class="tags">({posts.filter(post => post.data.tags?.includes(tag)).length})</span></li>)}</ul><p><a href="/">← All writing</a></p></section></Base>

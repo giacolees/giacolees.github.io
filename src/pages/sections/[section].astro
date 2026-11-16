@@ -1,0 +1,11 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { sections, sectionIds } from '../../topics';
+export function getStaticPaths() { return sectionIds.map(section => ({ params: { section } })); }
+const id = Astro.params.section as keyof typeof sections;
+const section = sections[id];
+const posts = (await getCollection('posts')).filter(post => post.data.section === id).sort((a,b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base title={section.title} description={section.description}><header class="archive-header"><p class="eyebrow">Topic / {posts.length} entries</p><h1>{section.title}</h1><p class="subtitle">{section.description}</p><nav class="topic-nav" aria-label="Topics">{sectionIds.map(key => <a href={`/sections/${key}/`} aria-current={key === id ? 'page' : undefined}>{sections[key].title}</a>)}</nav></header><PostList posts={posts} /><p class="back"><a href="/">← All writing</a></p></Base>
