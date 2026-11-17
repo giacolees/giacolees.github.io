@@ -1,12 +1,10 @@
-*.obsidian
-\.hugo_build.lock
-\.DS_Store
-scripts/.venv/
-content/posts/references.json
-scripts
-
-*.mp4
 node_modules/
 dist/
 .astro/
 .DS_Store
+
+# Local editor and assistant state
+.obsidian/
+.agent/
+.smtcmp_json_db/
+.smtcmp_vector_db.tar.gz

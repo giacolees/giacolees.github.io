@@ -1,6 +1,6 @@
 # giacolees — research journal
 
-A local, statically generated Astro notebook based on the approved retro mockup. No accounts, database, analytics, or deployment setup.
+A statically generated Astro research journal, deployed to GitHub Pages.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ The production website is generated in `dist/`. The custom error page is `dist/4
 
 ## Make it yours
 
-Edit `src/site.ts` for the identity, homepage heading, and default description. Edit `src/pages/about.astro` for the placeholder biography. Adjust colors and spacing in `src/styles/global.css`. All dates and the clearly labeled sample articles are editable placeholders.
+Edit `src/site.ts` for the identity, homepage heading, and default description. Edit `src/pages/about.astro` for the biography. Adjust colors and spacing in `src/styles/global.css`.
 
 Add a Markdown file to `src/content/posts/`:
 
@@ -32,6 +32,7 @@ Add a Markdown file to `src/content/posts/`:
 title: A new question
 date: 2026-02-01
 description: A short summary of the note.
+section: computation # computation, learning, or internet
 tags: [research, tools] # optional
 sample: false # optional; defaults to false
 ---
@@ -43,7 +44,7 @@ Markdown supports headings, lists, links, blockquotes, fenced code with a langua
 
 ## Design and motion
 
-Original reference files remain untouched in `assets/`. The globe is cropped from the supplied icon sheet; the document icon is a small SVG. Decorative window controls are noninteractive and hidden from assistive technology.
+Site assets live in `public/`: icons, article images, and the scripts and data for interactive demos. Decorative window controls are noninteractive and hidden from assistive technology.
 
 Homepage entries reveal once using IntersectionObserver (350ms fade and 8px rise). Content remains visible without JavaScript. Reduced motion disables the reveal and transitions. Articles have a thin blue progress line calculated against the article body using requestAnimationFrame; it reaches the end when the body’s bottom reaches the viewport bottom. Code blocks scroll independently and can receive keyboard focus when they overflow.
 
@@ -55,7 +56,7 @@ Every article has a required `section` field: `computation`, `learning`, or `int
 
 Tags are optional, cross-topic labels. Use lowercase, hyphenated tags (for example `machine-learning`). Click a tag on an article or use `/tags/` to browse its archive. These links work without JavaScript.
 
-Add an optional `updated: 2026-02-10` date to revised articles. It must be on or after `date`. Publication order and RSS publication dates stay based on the original date. The learning-in-public sample demonstrates an updated date.
+Add an optional `updated: 2026-02-10` date to revised articles. It must be on or after `date`. Publication order and RSS publication dates stay based on the original date.
 
 Articles link to the previous (older) and next (newer) entry across the full notebook. About content is in `src/pages/about.astro`; add your real biography and verified contact/profile links there.
 
