@@ -2,14 +2,230 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
-import { sections } from '../topics';
+import { sectionIds, sections } from '../topics';
 import { site } from '../site';
 const posts = (await getCollection('posts')).sort((a,b) => b.data.date.valueOf() - a.data.date.valueOf());
+const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
+  computation: '/icons/topic-computation.webp',
+  learning: '/icons/topic-learning.webp',
+  internet: '/icons/topic-internet.webp',
+};
 ---
 <Base>
-  <section class="intro"><div class="intro-heading"><h1>{site.heading}</h1><img class="globe" src="/icons/globe.png" width="60" height="60" alt="" /></div><p class="subtitle">{site.description}</p></section>
-  <section class="topics" aria-labelledby="topics-title"><h2 id="topics-title">Explore by topic</h2><div class="topic-grid">{Object.entries(sections).map(([id, section]) => <a class="topic-card" href={`/sections/${id}/`}><h3>{section.title}</h3><p>{section.description}</p><span class="sample">{posts.filter(post => post.data.section === id).length} entries →</span></a>)}</div><p class="browse-tags"><a href="/tags/">Browse all tags →</a></p></section>
+  <section class="intro">
+    <div class="intro-copy">
+      <h1>{site.heading}</h1>
+      <p class="subtitle">{site.description}</p>
+    </div>
+    <img class="glitch-globe" src="/icons/glitch-globe.webp" width="280" height="218" alt="" />
+  </section>
+  <section class="topics" aria-labelledby="topics-title">
+    <h2 id="topics-title">Explore by topic</h2>
+    <div class="topic-grid">
+      {sectionIds.map(id => {
+        const section = sections[id];
+        const icon = topicIcons[id];
+        return (
+          <a class="topic-card" href={`/sections/${id}/`}>
+            <div class="topic-card-heading">
+              <h3>{section.title}</h3>
+              {icon && <img class="topic-icon" src={icon} width="76" height="60" alt="" />}
+            </div>
+            <p>{section.description}</p>
+            <span class="sample">{posts.filter(post => post.data.section === id).length} entries →</span>
+          </a>
+        );
+      })}
+    </div>
+    <p class="browse-tags"><a href="/tags/">Browse all tags →</a></p>
+  </section>
   <section aria-labelledby="recent"><div class="section-heading"><h2 id="recent">Recent writing</h2><span class="eyebrow">{String(posts.length).padStart(2,'0')} entries</span></div>
     <PostList posts={posts} />
   </section>
 </Base>
+
+<style>
+  .intro {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(144px, 24vw, 280px);
+    align-items: center;
+    gap: clamp(18px, 4vw, 52px);
+    padding: 16px min(4vw, 48px) 16px 0;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .intro::after {
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    width: 48px;
+    height: 9px;
+    background: linear-gradient(to right, #d6bce2 50%, var(--purple) 50% 75%, var(--red) 75%);
+    content: '';
+  }
+
+  .intro h1 {
+    font-size: clamp(34px, 4.3vw, 64px);
+    text-wrap: balance;
+  }
+
+  .intro .subtitle {
+    font-size: clamp(19px, 1.8vw, 23px);
+  }
+
+  .glitch-globe,
+  .topic-icon {
+    display: block;
+    height: auto;
+    mix-blend-mode: darken;
+  }
+
+  .glitch-globe {
+    width: 100%;
+  }
+
+  .topics {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .topics > h2 {
+    margin-bottom: 14px;
+    font-size: 24px;
+    letter-spacing: -.5px;
+  }
+
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .topic-card {
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+    border: 1px solid var(--line);
+    text-decoration: none;
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out, background-color 120ms ease-out;
+  }
+
+  .topic-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: -8px 0 8px;
+    min-height: 52px;
+  }
+
+  .topic-card h3 {
+    margin: 0;
+    font-size: 22px;
+    text-decoration: underline;
+  }
+
+  .topic-icon {
+    flex: none;
+    width: clamp(38px, 5.2vw, 68px);
+  }
+
+  .topic-card p {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .topic-card .sample {
+    margin-top: auto;
+    font-size: 11px;
+  }
+
+  .topic-card:hover,
+  .topic-card:focus-visible {
+    background: var(--surface);
+  }
+
+  .topic-card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 var(--edge);
+  }
+
+  @media (hover: hover) {
+    .topic-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 3px 3px 0 var(--edge);
+    }
+  }
+
+  .browse-tags {
+    margin: 16px 0 0;
+    font-size: 15px;
+  }
+
+  @media (700px < width <= 900px) {
+    .topic-card {
+      padding: 14px;
+    }
+
+    .topic-card h3 {
+      font-size: 19px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .intro {
+      gap: 16px;
+      padding: 24px 0 18px;
+    }
+
+    .topic-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .topic-card {
+      padding: 16px;
+    }
+
+    .topic-card-heading {
+      min-height: 40px;
+    }
+
+    .topic-icon {
+      width: 52px;
+    }
+
+    .topic-card p {
+      margin-bottom: 10px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .intro {
+      grid-template-columns: 1fr;
+    }
+
+    .intro h1 {
+      text-wrap: wrap;
+    }
+
+    .glitch-globe {
+      justify-self: end;
+      width: clamp(145px, 43vw, 210px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .topic-card {
+      transition: none;
+    }
+
+    .topic-card:hover,
+    .topic-card:focus-visible {
+      transform: none;
+    }
+  }
+</style>
