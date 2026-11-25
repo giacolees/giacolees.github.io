@@ -46,7 +46,7 @@ Markdown supports headings, lists, links, blockquotes, fenced code with a langua
 
 Site assets live in `public/`: icons, article images, and the scripts and data for interactive demos. Decorative window controls are noninteractive and hidden from assistive technology.
 
-Homepage entries reveal once using IntersectionObserver (350ms fade and 8px rise). Content remains visible without JavaScript. Reduced motion disables the reveal and transitions. Articles have a thin red progress line calculated against the article body using requestAnimationFrame; it reaches the end when the body’s bottom reaches the viewport bottom. Code blocks scroll independently and can receive keyboard focus when they overflow.
+Motion follows the pixel logo: everything uses stepped (`steps()`) timing, with `--step` and `--shadow-purple` tokens in `global.css`. The header logo is a vector trace (`public/icons/giacolees-logo.svg`); the tagline types out once per session; the globe glitches every few seconds; topic cards lift with a hard purple shadow; entries reveal with a staggered stepped wipe (IntersectionObserver); page navigation uses a stepped wipe via view transitions. Content remains visible without JavaScript. Reduced motion disables all of it. Articles have a thin red progress line calculated against the article body using requestAnimationFrame; it reaches the end when the body’s bottom reaches the viewport bottom. Code blocks scroll independently and can receive keyboard focus when they overflow.
 
 The site uses system fonts and local assets, with no remote font requests. No preview annotation strip is included.
 

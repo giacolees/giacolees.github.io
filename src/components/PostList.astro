@@ -13,7 +13,7 @@ const { posts } = Astro.props;
     const observer = new IntersectionObserver(entries => entries.forEach(entry => {
       if (entry.isIntersecting) { entry.target.classList.remove('reveal-pending'); observer.unobserve(entry.target); }
     }), { threshold: 0.1 });
-    posts.forEach(post => { post.classList.add('reveal-pending'); observer.observe(post); });
+    posts.forEach((post, n) => { post.style.setProperty('--i', String(n % 4)); post.classList.add('reveal-pending'); observer.observe(post); });
     preference.addEventListener('change', () => { if (preference.matches) { observer.disconnect(); posts.forEach(post => post.classList.remove('reveal-pending')); } });
   }
 </script>

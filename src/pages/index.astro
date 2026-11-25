@@ -15,7 +15,7 @@ const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
   <section class="intro">
     <div class="intro-copy">
       <h1>{site.heading}</h1>
-      <p class="subtitle">{site.description}</p>
+      <p class="subtitle" id="tagline"><span class="sr-only">{site.description}</span><span class="typed" aria-hidden="true">{site.description}</span></p>
     </div>
     <img class="glitch-globe" src="/icons/glitch-globe.webp" width="280" height="218" alt="" />
   </section>
@@ -43,6 +43,23 @@ const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
     <PostList posts={posts} />
   </section>
 </Base>
+
+<script>
+  const el = document.querySelector<HTMLElement>('#tagline .typed');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let seen = false;
+  try { seen = sessionStorage.getItem('tagline-typed') === '1'; sessionStorage.setItem('tagline-typed', '1'); } catch {}
+  if (el && !reduce && !seen) {
+    const full = el.textContent ?? '';
+    el.textContent = '';
+    el.classList.add('typing');
+    let i = 0;
+    setTimeout(function tick() {
+      el.textContent = full.slice(0, ++i);
+      if (i < full.length) setTimeout(tick, 32); else el.classList.remove('typing');
+    }, 900);
+  }
+</script>
 
 <style>
   .intro {
@@ -83,6 +100,39 @@ const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
 
   .glitch-globe {
     width: 100%;
+    animation: glitch 6s steps(1, end) infinite;
+  }
+
+  .typing::after {
+    content: '';
+    display: inline-block;
+    width: .5em;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -.12em;
+    background: var(--red);
+    animation: caret 600ms steps(1, end) infinite;
+  }
+
+  .topic-icon {
+    transition: transform 160ms steps(2, end);
+  }
+
+  @media (hover: hover) {
+    .topic-card:hover .topic-icon {
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes caret {
+    50% { opacity: 0; }
+  }
+
+  @keyframes glitch {
+    0%, 90%, 100% { transform: none; clip-path: none; }
+    92% { transform: translateX(-6px); clip-path: inset(30% 0 52% 0); }
+    94% { transform: translateX(8px); clip-path: inset(58% 0 24% 0); }
+    96% { transform: translateX(-3px); clip-path: none; }
   }
 
   .topics {
@@ -108,7 +158,7 @@ const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
     padding: 18px;
     border: 1px solid var(--line);
     text-decoration: none;
-    transition: transform 150ms ease-out, box-shadow 150ms ease-out, background-color 120ms ease-out;
+    transition: transform 120ms steps(3, end), box-shadow 120ms steps(3, end), background-color 120ms ease-out;
   }
 
   .topic-card-heading {
@@ -150,13 +200,13 @@ const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
 
   .topic-card:focus-visible {
     transform: translateY(-2px);
-    box-shadow: 3px 3px 0 var(--edge);
+    box-shadow: var(--shadow-purple);
   }
 
   @media (hover: hover) {
     .topic-card:hover {
       transform: translateY(-2px);
-      box-shadow: 3px 3px 0 var(--edge);
+      box-shadow: var(--shadow-purple);
     }
   }
 
@@ -219,8 +269,16 @@ const topicIcons: Partial<Record<typeof sectionIds[number], string>> = {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .topic-card {
+    .glitch-globe, .typing::after {
+      animation: none;
+    }
+
+    .topic-icon, .topic-card {
       transition: none;
+    }
+
+    .topic-card:hover .topic-icon {
+      transform: none;
     }
 
     .topic-card:hover,
