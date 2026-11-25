@@ -11,16 +11,19 @@ const current = Astro.url.pathname;
   <head>
     <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title ? `${title} — ${site.name}` : `${site.name} — research journal`}</title>
-    <meta name="description" content={description} /><meta name="theme-color" content="#0000aa" />
+    <meta name="description" content={description} /><meta name="theme-color" content="#54077e" />
     <link rel="alternate" type="application/rss+xml" title={`${site.name} — RSS`} href="/rss.xml" />
-    <link rel="icon" href="/icons/document.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/giacolees-favicon.png" type="image/png" sizes="32x32" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="shell">
       <header class="window">
         <div class="titlebar"><img src="/icons/document.svg" width="22" height="27" alt="" /><span>research journal</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
-        <div class="toolbar"><a class="identity" href="/">{site.name}</a><nav aria-label="Main"><a href="/" aria-current={current === '/' ? 'page' : undefined}>Home</a><span aria-hidden="true">/</span><a href="/about/" aria-current={current === '/about/' ? 'page' : undefined}>About</a></nav></div>
+        <div class="toolbar">
+          <a class="identity" href="/"><img src="/icons/giacolees-logo.webp" width="360" height="228" alt={site.name} /></a>
+          <nav aria-label="Main"><a href="/" aria-current={current === '/' ? 'page' : undefined}>Home</a><span aria-hidden="true">/</span><a href="/about/" aria-current={current === '/about/' ? 'page' : undefined}>About</a></nav>
+        </div>
       </header>
       <main id="main" tabindex="-1"><slot /></main>
       <footer><em>handmade on the internet</em><nav aria-label="Footer"><a href="/rss.xml">RSS</a><a href="/">Home</a><span aria-hidden="true">/</span><a href="/about/">About</a></nav></footer>

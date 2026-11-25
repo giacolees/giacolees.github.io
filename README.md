@@ -23,7 +23,7 @@ The production website is generated in `dist/`. The custom error page is `dist/4
 
 ## Make it yours
 
-Edit `src/site.ts` for the identity, homepage heading, and default description. Edit `src/pages/about.astro` for the biography. Adjust colors and spacing in `src/styles/global.css`.
+Edit `src/site.ts` for the site name, homepage heading, and default description. The header logo and favicon are in `public/icons/`. Edit `src/pages/about.astro` for the biography. Adjust the palette and spacing in `src/styles/global.css`.
 
 Add a Markdown file to `src/content/posts/`:
 
@@ -46,7 +46,7 @@ Markdown supports headings, lists, links, blockquotes, fenced code with a langua
 
 Site assets live in `public/`: icons, article images, and the scripts and data for interactive demos. Decorative window controls are noninteractive and hidden from assistive technology.
 
-Homepage entries reveal once using IntersectionObserver (350ms fade and 8px rise). Content remains visible without JavaScript. Reduced motion disables the reveal and transitions. Articles have a thin blue progress line calculated against the article body using requestAnimationFrame; it reaches the end when the body’s bottom reaches the viewport bottom. Code blocks scroll independently and can receive keyboard focus when they overflow.
+Homepage entries reveal once using IntersectionObserver (350ms fade and 8px rise). Content remains visible without JavaScript. Reduced motion disables the reveal and transitions. Articles have a thin red progress line calculated against the article body using requestAnimationFrame; it reaches the end when the body’s bottom reaches the viewport bottom. Code blocks scroll independently and can receive keyboard focus when they overflow.
 
 The site uses system fonts and local assets, with no remote font requests. No preview annotation strip is included.
 
@@ -70,7 +70,7 @@ SITE_URL=https://your-domain.example npm run build
 
 The feed includes all posts, original publication dates, descriptions, topic categories, and tags. Sample entries are identified in their descriptions.
 
-Topic cards lift 2px with a crisp gray shadow on hover and keyboard focus (150ms). Links gain a pale blue highlight (120ms). Supporting browsers crossfade same-origin page navigations over 150ms using native CSS cross-document view transitions; other browsers navigate normally. Full page navigation preserves article-progress and post-reveal initialization. Reduced motion removes the lift and all added transitions while retaining static link/focus feedback. These effects work without JavaScript.
+Topic cards lift 2px with a crisp shadow on hover and keyboard focus (150ms). Links gain a pale purple highlight (120ms). Supporting browsers crossfade same-origin page navigations over 150ms using native CSS cross-document view transitions; other browsers navigate normally. Full page navigation preserves article-progress and post-reveal initialization. Reduced motion removes the lift and all added transitions while retaining static link/focus feedback. These effects work without JavaScript.
 
 ## GitHub Pages
 
