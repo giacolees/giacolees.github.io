@@ -53,8 +53,10 @@ a:not(.topic-card):hover,a:not(.topic-card):focus-visible{background-color:var(-
 .reading-progress::after{content:'';position:absolute;right:0;top:0;width:6px;height:6px;background:var(--purple)}
 .controls span:active{box-shadow:inset -2px -2px var(--highlight),inset 2px 2px var(--shadow)}
 @media(prefers-reduced-motion:no-preference){
-  .post.reveal-pending{opacity:1;transform:none;clip-path:inset(0 0 100% 0)}
-  .post{clip-path:inset(0 0 0 0);transition:clip-path calc(var(--step)*5) steps(5,end);transition-delay:calc(var(--i,0)*var(--step))}
+  /* Clip the children, not .post itself: IntersectionObserver ignores a clipped target and would never reveal it. */
+  .post.reveal-pending{opacity:1;transform:none}
+  .post>*{clip-path:inset(0 0 0 0);transition:clip-path calc(var(--step)*5) steps(5,end);transition-delay:calc(var(--i,0)*var(--step))}
+  .post.reveal-pending>*{clip-path:inset(0 0 100% 0)}
   ::view-transition-group(root){animation-duration:260ms}
   ::view-transition-old(root){animation:pixel-out 260ms steps(5,end) both}
   ::view-transition-new(root){animation:pixel-in 260ms steps(5,end) both}
